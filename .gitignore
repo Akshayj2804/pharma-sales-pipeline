@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+airflow_venv/
+*.egg-info/
+dist/
+build/
+
+# Data files (don't push large data to GitHub)
+data/raw/*.csv
+data/processed/*.parquet
+*.csv
+*.parquet
+
+# Checkpoints
+data/checkpoints/*.txt
+
+# Database
+*.db
+*.sqlite
+
+# Airflow
+airflow.cfg
+airflow.db
+logs/
+airflow-webserver.pid
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+config/secrets.py
+
+# Logs
+*.log
