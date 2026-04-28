@@ -38,16 +38,8 @@ End-to-end batch ETL pipeline that processes pharmaceutical sales data from raw 
 ---
 
 ## 🏗️ Architecture
-┌─────────────┐      ┌──────────────┐      ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
-│   Raw CSV   │ ───> │   Parquet    │ ───> │  Extract    │ ───> │  Validate &  │ ───> │ PostgreSQL  │
-│   250K rows │      │  (Monthly)   │      │ (Checkpoint)│      │  Transform   │      │ Star Schema │
-└─────────────┘      └──────────────┘      └─────────────┘      └──────────────┘      └─────────────┘
-│
-▼
-┌──────────────┐
-│   Airflow    │
-│ Orchestrator │
-└──────────────┘
+<img width="1536" height="1024" alt="architecture" src="https://github.com/user-attachments/assets/c2443120-ccae-4764-a709-169b964802e8" />
+
 
 **Data Flow:**
 1. **Preprocessing**: Split large CSV into monthly Parquet files
@@ -107,82 +99,56 @@ End-to-end batch ETL pipeline that processes pharmaceutical sales data from raw 
 ## 📂 Project Structure
 pharma-sales-pipeline/
 │
-├── airflow/
-│   └── dags/
-│       └── sales_pipeline_dag.py      # Airflow orchestration DAG
+├── 📂 airflow/
+│   └── 📂 dags/
+│       └── sales_pipeline_dag.py          # Airflow DAG (orchestration)
 │
-├── config/
-│   └── config.py                      # Database & path configurations
+├── 📂 config/
+│   └── config.py                         # DB config, paths, constants
 │
-├── data/
-│   ├── raw/                           # Source CSV files
-│   ├── processed/                     # Monthly parquet files (YYYY-MM.parquet)
-│   └── checkpoints/
-│       └── last_processed.txt         # Checkpoint tracker
+├── 📂 data/
+│   ├── 📂 raw/
+│   │   └── pharma_sales_raw.csv          # Original dataset
+│   │
+│   ├── 📂 processed/
+│   │   ├── 2017_01.parquet
+│   │   ├── 2017_02.parquet
+│   │   └── ...                           # Monthly partitioned data
+│   │
+│   └── 📂 checkpoints/
+│       └── last_processed.txt            # Incremental tracking
 │
-├── scripts/
-│   └── split_data.py                  # CSV to Parquet splitter
+├── 📂 scripts/
+│   └── split_data.py                     # CSV → Parquet splitter
 │
-├── sql/
-│   └── create_tables.sql              # DDL for star schema
+├── 📂 sql/
+│   └── create_tables.sql                 # Star schema DDL
 │
-├── src/
-│   ├── extract.py                     # Incremental data extraction
-│   ├── validate.py                    # Data quality validation
-│   ├── transform.py                   # Data cleaning & transformation
-│   ├── model.py                       # Dimensional modeling
-│   ├── load.py                        # PostgreSQL loading
-│   └── utils.py                       # Helper functions
+├── 📂 src/
+│   ├── extract.py                        # Incremental extraction logic
+│   ├── validate.py                       # Schema, null, range checks
+│   ├── transform.py                      # Cleaning + business logic
+│   ├── model.py                          # Fact & dimension creation
+│   ├── load.py                           # PostgreSQL loading logic
+│   └── utils.py                          # Helper functions (optional)
 │
-├── main.py                            # Local testing entry point
-├── requirements.txt                   # Python dependencies
-└── README.md                          # This file
-
+├── main.py                               # Run pipeline locally
+├── requirements.txt                      # Dependencies
+├── README.md                             # Documentation
+├── .gitignore                            # Ignore unnecessary files
+└── LICENSE                               # MIT (optional but good)
 ---
 
-## 📊 Data Model
+## 📸 Sample Output
 
-### **Star Schema Design**
-┌──────────────────┐
-                │  customers_dim   │
-                ├──────────────────┤
-                │ customer_name PK │
-                │ city             │
-                │ country          │
-                └──────────────────┘
-                          │
-                          │
-┌──────────────────┐      │      ┌──────────────────────┐
-│  products_dim    │      │      │  sales_team_dim      │
-├──────────────────┤      │      ├──────────────────────┤
-│ product_name  PK │      │      │ name_of_sales_rep PK │
-│ product_class    │      │      │ manager              │
-└──────────────────┘      │      │ sales_team           │
-          │               │      └──────────────────────┘
-          │               │                 │
-          └───────────────┼─────────────────┘
-                          │
-                          ▼
-                ┌──────────────────┐
-                │   sales_fact     │
-                ├──────────────────┤
-                │ customer_name FK │
-                │ product_name  FK │
-                │ quantity         │
-                │ price            │
-                │ sales            │
-                │ year             │
-                │ month            │
-                └──────────────────┘
+### Airflow DAG Success
+<img width="960" height="504" alt="airflow" src="https://github.com/user-attachments/assets/97e8d239-5dce-4402-bda9-b9b0c9cd09a9" />
 
-**Tables:**
-- `customers_dim`: Customer dimension (name, city, country)
-- `products_dim`: Product dimension (name, class)
-- `sales_team_dim`: Sales team dimension (rep, manager, team)
-- `sales_fact`: Sales transactions (foreign keys + metrics)
 
----
-
+### Database Load
+- Customers: 551 rows
+- Products: 240 rows
+- Sales: 5183 rows
 ## 🚀 Setup & Installation
 
 ### **Prerequisites**
@@ -325,13 +291,27 @@ GROUP BY product_name
 ORDER BY revenue DESC
 LIMIT 10;
 ```
+## 📊 Business Use Case
 
+This pipeline enables:
+- Monthly sales trend analysis
+- Top-performing product identification
+- Customer-level revenue insights
+
+---
 ### **Logs**
 - Airflow logs: `~/airflow/logs/`
 - Application logs: Console output during runs
 
 ---
+## 🎯 Key Takeaways
 
+- Built a production-style ETL pipeline from scratch  
+- Implemented incremental and idempotent processing  
+- Automated workflows using Airflow  
+- Designed data models for analytical querying
+  
+---
 ## 🔮 Future Enhancements
 
 - [ ] Add data quality metrics dashboard
@@ -345,23 +325,16 @@ LIMIT 10;
 
 ---
 
-## 📄 License
-
-MIT License - see LICENSE file for details
-
----
-
 ## 👤 Author
 
-**Akshay Jadhav**
+**Akshay Jagtap**
 - GitHub: [@Akshayj2804](https://github.com/Akshayj2804)
-- LinkedIn: [Add your LinkedIn]
+- LinkedIn: https://www.linkedin.com/in/akshay-jagtap2003/
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Pharmaceutical sales dataset: [Source if applicable]
 - Apache Airflow community
 - Open source Python data engineering tools
 
