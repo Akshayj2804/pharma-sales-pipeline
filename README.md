@@ -40,7 +40,14 @@ End-to-end batch ETL pipeline that processes pharmaceutical sales data from raw 
 ## 🏗️ Architecture
 <img width="1536" height="1024" alt="architecture" src="https://github.com/user-attachments/assets/c2443120-ccae-4764-a709-169b964802e8" />
 
+---
 
+## 📊 Data Model
+
+### **Star Schema Design**
+<img width="1536" height="1024" alt="ChatGPT Image Apr 28, 2026, 11_16_28 AM" src="https://github.com/user-attachments/assets/543ee3b0-5ea5-4405-900a-7d7e1ccd1a3d" />
+
+---
 **Data Flow:**
 1. **Preprocessing**: Split large CSV into monthly Parquet files
 2. **Extraction**: Incremental batch processing with checkpoint
