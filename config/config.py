@@ -5,7 +5,7 @@ DB_CONFIG = {
     "dbname": "sales_db",
     "user": "postgres",
     "password": "Mission@2026",
-    "host": "10.20.80.49",
+    "host": "172.26.176.1",
     "port": "5432"
 }
 
